@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Vale & Row — Support</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  :root{
+    --ink:#211A1D;
+    --forest:#5C1A2B;
+    --forest-dark:#38101B;
+    --oat:#F6F1E9;
+    --oat-card:#FFFFFF;
+    --brick:#B08D57;
+    --line:#E5DCD0;
+    --muted:#867C77;
+    --font-display: 'Fraunces', Georgia, serif;
+    --font-body: 'Public Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Public+Sans:wght@400;500;600;700&display=swap');
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;height:100%;background:var(--oat);font-family:var(--font-body);color:var(--ink);}
+
+  .app{
+    display:grid;
+    grid-template-columns: 300px 1fr;
+    height:100vh;
+    max-width:1180px;
+    margin:0 auto;
+    background:var(--oat);
+    border-left:1px solid var(--line);
+    border-right:1px solid var(--line);
+  }
+
+  /* ---------- Sidebar : Session Memory ---------- */
+  .sidebar{
+    background:var(--forest-dark);
+    color:#EDE8DC;
+    padding:28px 22px;
+    display:flex;
+    flex-direction:column;
+    gap:22px;
+    overflow-y:auto;
+  }
+  .brand{
+    font-family:var(--font-display);
+    font-size:22px;
+    font-weight:600;
+    letter-spacing:0.2px;
+    color:#fff;
+  }
+  .brand span{ color:#C9A86A; }
+  .brand-sub{
+    font-size:12.5px;
+    color:#B7C0AE;
+    margin-top:4px;
+    line-height:1.5;
+  }
+  .mem-block{
+    background:rgba(255,255,255,0.05);
+    border:1px solid rgba(255,255,255,0.08);
+    border-radius:6px;
+    padding:14px 16px;
+  }
+  .mem-title{
+    font-size:11px;
+    color:#9FAE93;
+    margin-bottom:8px;
+    letter-spacing:0.3px;
+  }
+  .mem-row{
+    display:flex;
+    justify-content:space-between;
+    gap:10px;
+    font-size:13px;
+    padding:5px 0;
+    border-bottom:1px solid rgba(255,255,255,0.06);
+  }
+  .mem-row:last-child{ border-bottom:none; }
+  .mem-key{ color:#B7C0AE; }
+  .mem-val{ color:#fff; font-weight:500; text-align:right; }
+  .mem-empty{ color:#7C8873; font-size:12.5px; font-style:italic; }
+
+  .agent-note{
+    margin-top:auto;
+    font-size:11.5px;
+    color:#8C9682;
+    line-height:1.6;
+    border-top:1px solid rgba(255,255,255,0.08);
+    padding-top:16px;
+  }
+  .agent-note b{ color:#C9A86A; }
+
+  /* ---------- Main chat pane ---------- */
+  .main{
+    display:flex;
+    flex-direction:column;
+    background:var(--oat);
+    min-width:0;
+  }
+  .topbar{
+    padding:20px 28px;
+    border-bottom:1px solid var(--line);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+  }
+  .topbar h1{
+    font-family:var(--font-display);
+    font-size:19px;
+    font-weight:600;
+    margin:0;
+  }
+  .topbar p{
+    margin:2px 0 0;
+    font-size:12.5px;
+    color:var(--muted);
+  }
+  .status-dot{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    font-size:12px;
+    color:var(--muted);
+  }
+  .status-dot i{
+    width:7px;height:7px;border-radius:50%;background:#5C8A5A;display:inline-block;
+  }
+
+  .thread{
+    flex:1;
+    overflow-y:auto;
+    padding:26px 28px;
+    display:flex;
+    flex-direction:column;
+    gap:16px;
+  }
+  .msg{
+    max-width:72%;
+    padding:12px 16px;
+    border-radius:10px;
+    font-size:14.5px;
+    line-height:1.55;
+    white-space:pre-wrap;
+  }
+  .msg.bot{
+    align-self:flex-start;
+    background:var(--oat-card);
+    border:1px solid var(--line);
+    border-top-left-radius:2px;
+  }
+  .msg.user{
+    align-self:flex-end;
+    background:var(--forest);
+    color:#F4F1E8;
+    border-top-right-radius:2px;
+  }
+  .msg.tool{
+    align-self:flex-start;
+    background:transparent;
+    border:1px dashed #C9BFA6;
+    color:var(--muted);
+    font-size:12.5px;
+    padding:8px 14px;
+    max-width:80%;
+  }
+  .msg.tool b{ color:var(--brick); }
+
+  .chips{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    padding:0 28px 16px;
+  }
+  .chip{
+    border:1px solid var(--line);
+    background:var(--oat-card);
+    padding:8px 14px;
+    border-radius:20px;
+    font-size:13px;
+    cursor:pointer;
+    color:var(--ink);
+    transition:border-color .15s ease, background .15s ease;
+  }
+  .chip:hover{ border-color:var(--forest); background:#EEF1E9; }
+
+  .composer{
+    display:flex;
+    gap:10px;
+    padding:18px 28px 24px;
+    border-top:1px solid var(--line);
+    background:var(--oat);
+  }
+  .composer input{
+    flex:1;
+    padding:13px 16px;
+    border-radius:8px;
+    border:1px solid var(--line);
+    font-size:14.5px;
+    font-family:var(--font-body);
+    background:var(--oat-card);
+    outline:none;
+  }
+  .composer input:focus{ border-color:var(--forest); }
+  .composer button{
+    background:var(--forest);
+    color:#fff;
+    border:none;
+    padding:0 22px;
+    border-radius:8px;
+    font-size:14px;
+    font-weight:600;
+    cursor:pointer;
+    font-family:var(--font-body);
+  }
+  .composer button:disabled{ opacity:0.5; cursor:default; }
+
+  .typing{
+    align-self:flex-start;
+    display:flex;
+    gap:4px;
+    padding:14px 16px;
+    background:var(--oat-card);
+    border:1px solid var(--line);
+    border-radius:10px;
+    border-top-left-radius:2px;
+    width:fit-content;
+  }
+  .typing i{
+    width:6px;height:6px;border-radius:50%;background:var(--muted);
+    animation:bounce 1.1s infinite ease-in-out;
+  }
+  .typing i:nth-child(2){ animation-delay:0.15s; }
+  .typing i:nth-child(3){ animation-delay:0.3s; }
+  @keyframes bounce{
+    0%,60%,100%{ transform:translateY(0); opacity:0.5;}
+    30%{ transform:translateY(-4px); opacity:1;}
+  }
+
+  ::-webkit-scrollbar{ width:8px; }
+  ::-webkit-scrollbar-thumb{ background:#CFC5AE; border-radius:8px; }
+
+  @media (max-width:760px){
+    .app{ grid-template-columns:1fr; }
+    .sidebar{ display:none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <aside class="sidebar">
+    <div>
+      <div class="brand">Vale <span>&</span> Row</div>
+      <div class="brand-sub">AI Customer Support Agent<br>Tool Calling + Memory demo</div>
+    </div>
+
+    <div class="mem-block">
+      <div class="mem-title">SESSION MEMORY</div>
+      <div id="memList">
+        <div class="mem-empty">No context captured yet — ask about an order or product to begin.</div>
+      </div>
+    </div>
+
+    <div class="mem-block">
+      <div class="mem-title">AVAILABLE TOOLS</div>
+      <div class="mem-row"><span class="mem-key">check_order_status</span></div>
+      <div class="mem-row"><span class="mem-key">search_products</span></div>
+      <div class="mem-row"><span class="mem-key">initiate_return</span></div>
+      <div class="mem-row"><span class="mem-key">get_recommendations</span></div>
+    </div>
+
+    <div class="agent-note">
+      <b>Try:</b> "Where's order VR-1042?" · "Show me denim jackets" · "I want to return VR-1042" · "Recommend something like it"
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div>
+        <h1>Support Chat</h1>
+        <p>Vale &amp; Row Clothing Co.</p>
+      </div>
+      <div class="status-dot"><i></i> Agent online</div>
+    </div>
+
+    <div class="thread" id="thread"></div>
+
+    <div class="chips" id="chips">
+      <div class="chip" data-msg="Where is my order VR-1042?">Track order VR-1042</div>
+      <div class="chip" data-msg="Can you show me some denim jackets?">Browse jackets</div>
+      <div class="chip" data-msg="I'd like to return order VR-1042, the size doesn't fit.">Start a return</div>
+      <div class="chip" data-msg="Can you recommend something similar to what I ordered?">Get recommendations</div>
+    </div>
+
+    <div class="composer">
+      <input type="text" id="userInput" placeholder="Type your message…" autocomplete="off">
+      <button id="sendBtn">Send</button>
+    </div>
+  </main>
+</div>
+
+<script>
+/* ============ MOCK STORE DATA ============ */
+const PRODUCTS = [
+  {id:"P-301", name:"Indigo Washed Denim Jacket", category:"jackets",  price:68, stock:12},
+  {id:"P-302", name:"Camel Wool-Blend Overcoat",  category:"jackets",  price:129,stock:0},
+  {id:"P-303", name:"Slim Fit Chino Trousers",    category:"trousers",price:44, stock:26},
+  {id:"P-304", name:"Straight Leg Denim Jeans",   category:"denim",   price:56, stock:18},
+  {id:"P-305", name:"Cotton Poplin Shirt",        category:"shirts",  price:38, stock:22},
+  {id:"P-306", name:"Ribbed Knit Sweater",        category:"knitwear",price:49, stock:9},
+  {id:"P-307", name:"Leather Ankle Boots",        category:"footwear",price:95, stock:7},
+  {id:"P-308", name:"Canvas Low-Top Sneakers",    category:"footwear",price:52, stock:31},
+];
+
+const ORDERS = {
+  "VR-1042": {customer:"Meera", items:["Indigo Washed Denim Jacket","Cotton Poplin Shirt"], status:"Delivered", deliveredOn:"Sept 3, 2026"},
+  "VR-1091": {customer:"Arjun", items:["Leather Ankle Boots"], status:"In transit", eta:"Sept 10, 2026"},
+  "VR-1120": {customer:"Divya", items:["Ribbed Knit Sweater"], status:"Processing", eta:"Ships Sept 9, 2026"},
+};
+
+/* ============ SESSION MEMORY ============ */
+const memory = {
+  customerName: null,
+  lastOrderId: null,
+  lastCategoryViewed: null,
+  returnRequested: null,
+};
+
+function renderMemory(){
+  const list = document.getElementById('memList');
+  const rows = [];
+  if(memory.customerName) rows.push(['Customer', memory.customerName]);
+  if(memory.lastOrderId) rows.push(['Last order referenced', memory.lastOrderId]);
+  if(memory.lastCategoryViewed) rows.push(['Browsing category', memory.lastCategoryViewed]);
+  if(memory.returnRequested) rows.push(['Return in progress', memory.returnRequested]);
+  if(rows.length === 0){
+    list.innerHTML = '<div class="mem-empty">No context captured yet — ask about an order or product to begin.</div>';
+    return;
+  }
+  list.innerHTML = rows.map(([k,v]) => `<div class="mem-row"><span class="mem-key">${k}</span><span class="mem-val">${v}</span></div>`).join('');
+}
+
+/* ============ TOOL IMPLEMENTATIONS ============ */
+function tool_check_order_status(input){
+  const order = ORDERS[input.order_id];
+  memory.lastOrderId = input.order_id;
+  renderMemory();
+  if(!order) return {found:false, message:`No order found with ID ${input.order_id}.`};
+  memory.customerName = order.customer;
+  renderMemory();
+  return {found:true, ...order};
+}
+
+function tool_search_products(input){
+  const q = (input.query || "").toLowerCase();
+  const matches = PRODUCTS.filter(p =>
+    p.name.toLowerCase().includes(q) || p.category.toLowerCase().includes(q)
+  );
+  if(matches.length) memory.lastCategoryViewed = matches[0].category;
+  renderMemory();
+  return {count: matches.length, results: matches};
+}
+
+function tool_initiate_return(input){
+  const order = ORDERS[input.order_id];
+  memory.lastOrderId = input.order_id;
+  memory.returnRequested = input.order_id;
+  renderMemory();
+  if(!order) return {success:false, message:`Order ${input.order_id} not found, cannot start return.`};
+  return {success:true, order_id: input.order_id, reason: input.reason || "Not specified", message:"Return initiated. A prepaid label will be emailed within 24 hours."};
+}
+
+function tool_get_recommendations(input){
+  const cat = input.category || memory.lastCategoryViewed;
+  const recs = PRODUCTS.filter(p => p.category === cat).slice(0,3);
+  return {category: cat || "general", recommendations: recs.length ? recs : PRODUCTS.slice(0,3)};
+}
+
+const TOOL_IMPL = {
+  check_order_status: tool_check_order_status,
+  search_products: tool_search_products,
+  initiate_return: tool_initiate_return,
+  get_recommendations: tool_get_recommendations,
+};
+
+const TOOL_DEFS = [
+  {
+    name: "check_order_status",
+    description: "Look up the status, contents, and delivery info of a customer's order by order ID.",
+    input_schema: {
+      type: "object",
+      properties: { order_id: { type: "string", description: "Order ID, e.g. VR-1042" } },
+      required: ["order_id"]
+    }
+  },
+  {
+    name: "search_products",
+    description: "Search the product catalog by keyword or category (e.g. 'denim', 'jacket').",
+    input_schema: {
+      type: "object",
+      properties: { query: { type: "string", description: "Search term or category" } },
+      required: ["query"]
+    }
+  },
+  {
+    name: "initiate_return",
+    description: "Start a return for a given order ID, with an optional reason.",
+    input_schema: {
+      type: "object",
+      properties: {
+        order_id: { type: "string" },
+        reason: { type: "string", description: "Reason for the return" }
+      },
+      required: ["order_id"]
+    }
+  },
+  {
+    name: "get_recommendations",
+    description: "Recommend products similar to a given category. If no category is given, use the last one discussed.",
+    input_schema: {
+      type: "object",
+      properties: { category: { type: "string" } },
+      required: []
+    }
+  },
+];
+
+const SYSTEM_PROMPT = `You are the support agent for Vale & Row, an online clothing and footwear store.
+You help customers with order status, product questions, returns, and outfit recommendations.
+Use the provided tools whenever a question needs live data — never guess order, size, or stock details.
+Keep replies warm, concise (2-4 sentences), and specific. When listing products, mention name and price.
+If a tool reports something not found, say so plainly and offer a next step.`;
+
+/* ============ CHAT STATE + UI ============ */
+let messages = []; // Anthropic-format message history (memory across turns)
+const thread = document.getElementById('thread');
+const input = document.getElementById('userInput');
+const sendBtn = document.getElementById('sendBtn');
+
+function addBubble(role, text){
+  const div = document.createElement('div');
+  div.className = 'msg ' + role;
+  div.textContent = text;
+  thread.appendChild(div);
+  thread.scrollTop = thread.scrollHeight;
+}
+
+function addToolNote(name, input){
+  const div = document.createElement('div');
+  div.className = 'msg tool';
+  div.innerHTML = `<b>tool call</b> → ${name}(${JSON.stringify(input)})`;
+  thread.appendChild(div);
+  thread.scrollTop = thread.scrollHeight;
+}
+
+function showTyping(){
+  const div = document.createElement('div');
+  div.className = 'typing';
+  div.id = 'typingIndicator';
+  div.innerHTML = '<i></i><i></i><i></i>';
+  thread.appendChild(div);
+  thread.scrollTop = thread.scrollHeight;
+}
+function hideTyping(){
+  const t = document.getElementById('typingIndicator');
+  if(t) t.remove();
+}
+
+async function callClaude(msgHistory){
+  const response = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      model: "claude-sonnet-4-6",
+      max_tokens: 1000,
+      system: SYSTEM_PROMPT,
+      tools: TOOL_DEFS,
+      messages: msgHistory
+    })
+  });
+  return response.json();
+}
+
+async function handleTurn(userText){
+  messages.push({ role: "user", content: userText });
+  addBubble('user', userText);
+  input.value = "";
+  sendBtn.disabled = true;
+  showTyping();
+
+  try{
+    let data = await callClaude(messages);
+    let guard = 0;
+
+    while(data && data.content && data.stop_reason === "tool_use" && guard < 5){
+      guard++;
+      messages.push({ role: "assistant", content: data.content });
+
+      const toolResults = [];
+      for(const block of data.content){
+        if(block.type === "tool_use"){
+          hideTyping();
+          addToolNote(block.name, block.input);
+          const impl = TOOL_IMPL[block.name];
+          const result = impl ? impl(block.input) : {error:"Unknown tool"};
+          toolResults.push({
+            type: "tool_result",
+            tool_use_id: block.id,
+            content: JSON.stringify(result)
+          });
+          showTyping();
+        }
+      }
+      messages.push({ role: "user", content: toolResults });
+      data = await callClaude(messages);
+    }
+
+    hideTyping();
+    if(data && data.content){
+      const textBlock = data.content.find(b => b.type === "text");
+      const finalText = textBlock ? textBlock.text : "Sorry, I couldn't process that.";
+      messages.push({ role: "assistant", content: data.content });
+      addBubble('bot', finalText);
+    } else {
+      addBubble('bot', "Something went wrong reaching the support agent. Please try again.");
+    }
+  } catch(err){
+    hideTyping();
+    addBubble('bot', "I'm having trouble connecting right now. Please try again in a moment.");
+    console.error(err);
+  }
+  sendBtn.disabled = false;
+  input.focus();
+}
+
+sendBtn.addEventListener('click', () => {
+  const text = input.value.trim();
+  if(text) handleTurn(text);
+});
+input.addEventListener('keydown', (e) => {
+  if(e.key === 'Enter'){
+    const text = input.value.trim();
+    if(text) handleTurn(text);
+  }
+});
+document.querySelectorAll('.chip').forEach(chip => {
+  chip.addEventListener('click', () => {
+    const text = chip.getAttribute('data-msg');
+    handleTurn(text);
+  });
+});
+
+/* Greeting */
+addBubble('bot', "Hi, welcome to Vale & Row! I can check an order, help with a return, find a piece from our collection, or suggest something you'll like. What can I help with?");
+</script>
+
+</body>
+</html>
